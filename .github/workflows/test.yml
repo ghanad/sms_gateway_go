@@ -14,9 +14,15 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
+      - name: Download Go modules for backend-server-a
+        working-directory: sms-gateway-project/backend-server-a
+        run: go mod tidy
       - name: Test backend-server-a
         working-directory: sms-gateway-project/backend-server-a
         run: go test ./...
+      - name: Download Go modules for backend-server-b
+        working-directory: sms-gateway-project/backend-server-b
+        run: go mod tidy
       - name: Test backend-server-b
         working-directory: sms-gateway-project/backend-server-b
         run: go test ./...
