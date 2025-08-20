@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, Typography, CircularProgress, Alert } from '@mui/material';
-import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from '@mui/lab';
 import apiService from '../services/apiService.js';
 
 const MessageDetailPage = () => {
@@ -36,20 +35,6 @@ const MessageDetailPage = () => {
           <Typography>Text: {message.text}</Typography>
         </CardContent>
       </Card>
-      <Timeline>
-        {message.events?.map((event, index) => (
-          <TimelineItem key={index}>
-            <TimelineSeparator>
-              <TimelineDot />
-              {index < message.events.length - 1 && <TimelineConnector />}
-            </TimelineSeparator>
-            <TimelineContent>
-              <Typography>{event.status}</Typography>
-              <Typography variant="caption">{event.timestamp}</Typography>
-            </TimelineContent>
-          </TimelineItem>
-        ))}
-      </Timeline>
     </div>
   );
 };

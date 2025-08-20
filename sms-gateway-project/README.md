@@ -21,3 +21,7 @@ npm run build
 ```
 
 The frontend relies on Material UI, React Router, Axios, and date-fns for its UI and data handling.
+
+### Dockerization
+
+The frontend application can be built and run using Docker. Refer to the `frontend/README.md` for detailed instructions.
