@@ -2,6 +2,8 @@
 
 This directory contains the frontend application for the SMS Gateway project. It is a React application built with Vite.
 
+The interface uses [Tailwind CSS](https://tailwindcss.com/) via the CDN script included in `index.html`, allowing rapid UI prototyping without additional build steps.
+
 ## Dockerization
 
 To build and run the frontend application using Docker, follow these steps:
