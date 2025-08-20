@@ -1,6 +1,7 @@
 # Stage 1: Build
 FROM golang:1.21-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache git
 COPY . .
 RUN go mod tidy && \
     go build -o backend-server-a ./cmd/api
