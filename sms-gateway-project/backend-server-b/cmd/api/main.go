@@ -27,7 +27,14 @@ func main() {
 		log.Fatalf("migrate: %v", err)
 	}
 
-	repo := repository.NewMessageRepository(db)
+	msgRepo := repository.NewMessageRepository(db)
+	userRepo := repository.NewUserRepository(db)
+
+	if err := services.SeedAdminUser(userRepo, cfg.DefaultAdminUsername, cfg.DefaultAdminPassword); err != nil {
+		log.Fatalf("seed admin: %v", err)
+	}
+
+	jwtSvc := services.NewJWTService(cfg.JWTSecretKey)
 
 	provs := map[string]providers.SmsProvider{}
 	for name, pcfg := range cfg.Providers {
@@ -36,16 +43,22 @@ func main() {
 		}
 	}
 
-	engine := services.NewPolicyEngine(repo, provs)
+	engine := services.NewPolicyEngine(msgRepo, provs)
 	consumer := worker.NewConsumer(cfg.RabbitMQURL, cfg.RabbitMQQueueName, engine)
 	if err := consumer.StartConsumer(); err != nil {
 		log.Fatalf("consumer: %v", err)
 	}
 
-	handlers := api.NewHandlers(repo)
+	handlers := api.NewHandlers(msgRepo, userRepo, jwtSvc)
 	r := gin.Default()
-	r.GET("/api/status/:tracking_id", handlers.GetStatusHandler)
-	r.POST("/webhooks/delivery-report/:provider", handlers.DeliveryWebhookHandler)
+
+	authRoutes := r.Group("/api/auth")
+	authRoutes.POST("/login", handlers.LoginHandler)
+
+	apiRoutes := r.Group("/api")
+	apiRoutes.Use(api.AuthMiddleware(jwtSvc))
+	apiRoutes.GET("/status/:tracking_id", handlers.GetStatusHandler)
+	apiRoutes.POST("/webhooks/delivery-report/:provider", handlers.DeliveryWebhookHandler)
 
 	if err := r.Run(cfg.ListenAddr); err != nil {
 		log.Fatalf("server: %v", err)
