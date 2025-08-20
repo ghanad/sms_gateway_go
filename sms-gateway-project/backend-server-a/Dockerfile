@@ -2,7 +2,8 @@
 FROM golang:1.21-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN go mod tidy && \
+RUN apk add --no-cache git && \
+    go mod tidy && \
     go build -o backend-server-a ./cmd/api
 
 # Stage 2: Final
