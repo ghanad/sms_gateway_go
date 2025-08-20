@@ -5,7 +5,7 @@ COPY go.mod go.sum .
 COPY internal ./internal
 COPY cmd ./cmd
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o sms-server ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=mod -o sms-server ./cmd/api
 
 # Stage 2: final image
 FROM alpine:3.18
