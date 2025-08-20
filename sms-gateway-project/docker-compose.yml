@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  postgres:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: sms_gateway_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend-server-b:
+    build:
+      context: ./backend-server-b
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      LISTEN_ADDR: ":8081"
+      DATABASE_URL: "host=postgres user=user password=password dbname=sms_gateway_db port=5432 sslmode=disable TimeZone=Asia/Tehran"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+      RABBITMQ_QUEUE_NAME: "sms_messages"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend-server-b # Assuming frontend needs backend to be up
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8081"
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
