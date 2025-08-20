@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api'
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
 });
 
 api.interceptors.request.use((config) => {
@@ -13,7 +13,7 @@ api.interceptors.request.use((config) => {
 });
 
 const login = async (username, password) => {
-  const response = await api.post('/api/auth/login', { username, password });
+  const response = await api.post('/auth/login', { username, password });
   return response.data;
 };
 
