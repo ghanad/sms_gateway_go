@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
+	"time" 
 	"sms-gateway/backend-server-b/internal/api"
 	"sms-gateway/backend-server-b/internal/config"
 	"sms-gateway/backend-server-b/internal/database"
@@ -51,6 +53,16 @@ func main() {
 
 	handlers := api.NewHandlers(msgRepo, userRepo, jwtSvc)
 	r := gin.Default()
+
+	// Configure CORS middleware
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.AllowedOrigins, // Use configured allowed origins (now a slice)
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	authRoutes := r.Group("/api/auth")
 	authRoutes.POST("/login", handlers.LoginHandler)

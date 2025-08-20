@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"strings" // Import the strings package
 
 	"github.com/joho/godotenv"
 )
@@ -23,6 +24,7 @@ type Config struct {
 	DefaultAdminUsername string
 	DefaultAdminPassword string
 	JWTSecretKey         string
+	AllowedOrigins       []string // Changed to slice of strings
 }
 
 // LoadConfig loads configuration from environment variables and .env files.
@@ -38,6 +40,11 @@ func LoadConfig() (*Config, error) {
 		DefaultAdminUsername: os.Getenv("DEFAULT_ADMIN_USERNAME"),
 		DefaultAdminPassword: os.Getenv("DEFAULT_ADMIN_PASSWORD"),
 		JWTSecretKey:         os.Getenv("JWT_SECRET_KEY"),
+	}
+
+	// Load and split AllowedOrigins
+	if origins := os.Getenv("ALLOWED_ORIGINS"); origins != "" {
+		cfg.AllowedOrigins = strings.Split(origins, ",")
 	}
 
 	if data := os.Getenv("PROVIDERS_CONFIG"); data != "" {
