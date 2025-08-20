@@ -15,11 +15,14 @@ type ProviderConfig struct {
 
 // Config holds application configuration loaded from environment variables.
 type Config struct {
-	ListenAddr        string
-	DatabaseURL       string
-	RabbitMQURL       string
-	RabbitMQQueueName string
-	Providers         map[string]ProviderConfig
+	ListenAddr           string
+	DatabaseURL          string
+	RabbitMQURL          string
+	RabbitMQQueueName    string
+	Providers            map[string]ProviderConfig
+	DefaultAdminUsername string
+	DefaultAdminPassword string
+	JWTSecretKey         string
 }
 
 // LoadConfig loads configuration from environment variables and .env files.
@@ -27,11 +30,14 @@ func LoadConfig() (*Config, error) {
 	_ = godotenv.Load()
 
 	cfg := &Config{
-		ListenAddr:        os.Getenv("LISTEN_ADDR"),
-		DatabaseURL:       os.Getenv("DATABASE_URL"),
-		RabbitMQURL:       os.Getenv("RABBITMQ_URL"),
-		RabbitMQQueueName: os.Getenv("RABBITMQ_QUEUE_NAME"),
-		Providers:         map[string]ProviderConfig{},
+		ListenAddr:           os.Getenv("LISTEN_ADDR"),
+		DatabaseURL:          os.Getenv("DATABASE_URL"),
+		RabbitMQURL:          os.Getenv("RABBITMQ_URL"),
+		RabbitMQQueueName:    os.Getenv("RABBITMQ_QUEUE_NAME"),
+		Providers:            map[string]ProviderConfig{},
+		DefaultAdminUsername: os.Getenv("DEFAULT_ADMIN_USERNAME"),
+		DefaultAdminPassword: os.Getenv("DEFAULT_ADMIN_PASSWORD"),
+		JWTSecretKey:         os.Getenv("JWT_SECRET_KEY"),
 	}
 
 	if data := os.Getenv("PROVIDERS_CONFIG"); data != "" {
