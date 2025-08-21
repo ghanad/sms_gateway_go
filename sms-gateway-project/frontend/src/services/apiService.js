@@ -17,6 +17,10 @@ const login = async (username, password) => {
   return response.data;
 };
 
+const logout = async () => {
+  await api.post('/auth/logout');
+};
+
 const getDashboardStats = async () => {
   const response = await api.get('/dashboard');
   return response.data;
@@ -49,6 +53,7 @@ const updateClient = async (clientId, clientData) => {
 
 export default {
   login,
+  logout,
   getDashboardStats,
   getMessages,
   getMessageDetails,
