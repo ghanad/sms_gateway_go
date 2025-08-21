@@ -1,6 +1,7 @@
 # Stage 1: Build
 FROM golang:1.21-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache git
 COPY . .
 RUN apk add --no-cache git && \
     go mod tidy && \
