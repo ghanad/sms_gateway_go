@@ -79,6 +79,7 @@ func main() {
 	userRoutes.Use(api.AdminOnlyMiddleware())
 	userRoutes.GET("", handlers.ListUsersHandler)
 	userRoutes.POST("", handlers.CreateUserHandler)
+	userRoutes.PUT(":id", handlers.UpdateUserHandler)
 	userRoutes.DELETE(":id", handlers.DeleteUserHandler)
 	userRoutes.POST(":id/activate", handlers.ActivateUserHandler)
 	userRoutes.POST(":id/deactivate", handlers.DeactivateUserHandler)

@@ -16,6 +16,7 @@ const style = {
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -48,20 +49,7 @@ const UserManagementPage = () => {
     fetchUsers();
   }, []);
 
-  const handleCreate = async () => {
-    await apiService.createUser({
-      username,
-      name,
-      phone,
-      extension,
-      department,
-      password,
-      api_key: apiKey,
-      daily_quota: dailyQuota,
-      is_admin: isAdmin,
-      is_active: isActive
-    });
-    setOpen(false);
+  const resetForm = () => {
     setUsername('');
     setName('');
     setPhone('');
@@ -72,6 +60,50 @@ const UserManagementPage = () => {
     setDailyQuota('');
     setIsAdmin(false);
     setIsActive(true);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
+    resetForm();
+    setOpen(true);
+  };
+
+  const handleOpenEdit = (user) => {
+    setEditingId(user.id);
+    setUsername(user.username);
+    setName(user.name);
+    setPhone(user.phone);
+    setExtension(user.extension);
+    setDepartment(user.department);
+    setPassword('');
+    setApiKey(user.api_key);
+    setDailyQuota(user.daily_quota);
+    setIsAdmin(user.is_admin);
+    setIsActive(user.is_active);
+    setOpen(true);
+  };
+
+  const handleSave = async () => {
+    const payload = {
+      username,
+      name,
+      phone,
+      extension,
+      department,
+      password,
+      api_key: apiKey,
+      daily_quota: dailyQuota,
+      is_admin: isAdmin,
+      is_active: isActive
+    };
+    if (editingId) {
+      await apiService.updateUser(editingId, payload);
+    } else {
+      await apiService.createUser(payload);
+    }
+    setOpen(false);
+    resetForm();
+    setEditingId(null);
     fetchUsers();
   };
 
@@ -105,12 +137,11 @@ const UserManagementPage = () => {
       flex: 1,
       renderCell: (params) => (
         <>
+          <Button onClick={() => handleOpenEdit(params.row)} size="small">Edit</Button>
           <Button onClick={() => handleToggleActive(params.row)} size="small">
             {params.row.is_active ? 'Deactivate' : 'Activate'}
           </Button>
-          <Button onClick={() => handleDelete(params.row.id)} size="small" color="error">
-            Delete
-          </Button>
+          <Button onClick={() => handleDelete(params.row.id)} size="small" color="error">Delete</Button>
         </>
       )
     }
@@ -118,7 +149,7 @@ const UserManagementPage = () => {
 
   return (
     <div style={{ height: 500, width: '100%' }}>
-      <Button variant="contained" sx={{ mb: 2 }} onClick={() => setOpen(true)}>
+      <Button variant="contained" sx={{ mb: 2 }} onClick={handleOpenCreate}>
         Create New User
       </Button>
       <DataGrid rows={users} columns={columns} getRowId={(row) => row.id} />
@@ -134,7 +165,7 @@ const UserManagementPage = () => {
           <TextField label="Daily Quota" fullWidth margin="normal" value={dailyQuota} onChange={(e) => setDailyQuota(e.target.value)} />
           <FormControlLabel control={<Checkbox checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} />} label="Admin" />
           <FormControlLabel control={<Checkbox checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />} label="Active" />
-          <Button variant="contained" onClick={handleCreate}>Save</Button>
+          <Button variant="contained" onClick={handleSave}>Save</Button>
         </Box>
       </Modal>
     </div>
