@@ -22,12 +22,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', data.token);
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-  };
+    const logout = async () => {
+      await apiService.logout();
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    };
 
   return (
     <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout }}>

@@ -3,9 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
-	"time" 
+	"github.com/gin-gonic/gin"
 	"sms-gateway/backend-server-b/internal/api"
 	"sms-gateway/backend-server-b/internal/config"
 	"sms-gateway/backend-server-b/internal/database"
@@ -13,6 +12,7 @@ import (
 	"sms-gateway/backend-server-b/internal/repository"
 	"sms-gateway/backend-server-b/internal/services"
 	"sms-gateway/backend-server-b/internal/worker"
+	"time"
 )
 
 func main() {
@@ -66,6 +66,7 @@ func main() {
 
 	authRoutes := r.Group("/api/auth")
 	authRoutes.POST("/login", handlers.LoginHandler)
+	authRoutes.POST("/logout", handlers.LogoutHandler)
 
 	apiRoutes := r.Group("/api")
 	apiRoutes.Use(api.AuthMiddleware(jwtSvc))

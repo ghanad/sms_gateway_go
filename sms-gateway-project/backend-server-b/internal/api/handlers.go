@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -86,6 +87,23 @@ func (h *Handlers) LoginHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// LogoutHandler revokes the provided JWT token.
+func (h *Handlers) LogoutHandler(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+	tokenString := parts[1]
+	if _, err := h.JWTService.ValidateToken(tokenString); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+	h.JWTService.RevokeToken(tokenString)
+	c.JSON(http.StatusOK, gin.H{"status": "logged out"})
 }
 
 func (h *Handlers) GetDashboardStatsHandler(c *gin.Context) {

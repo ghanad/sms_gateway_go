@@ -9,12 +9,13 @@ import (
 
 // JWTService handles JWT generation and validation.
 type JWTService struct {
-	secret string
+	secret  string
+	revoked map[string]struct{}
 }
 
 // NewJWTService creates a new JWTService.
 func NewJWTService(secret string) *JWTService {
-	return &JWTService{secret: secret}
+	return &JWTService{secret: secret, revoked: make(map[string]struct{})}
 }
 
 // Claims defines the JWT payload structure.
@@ -40,8 +41,16 @@ func (j *JWTService) GenerateToken(username string, userID uint, isAdmin bool) (
 	return token.SignedString([]byte(j.secret))
 }
 
+// RevokeToken marks a token as invalid.
+func (j *JWTService) RevokeToken(token string) {
+	j.revoked[token] = struct{}{}
+}
+
 // ValidateToken parses and validates a JWT string.
 func (j *JWTService) ValidateToken(tokenString string) (*Claims, error) {
+	if _, ok := j.revoked[tokenString]; ok {
+		return nil, errors.New("token revoked")
+	}
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(j.secret), nil
 	})
