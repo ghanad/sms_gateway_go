@@ -51,6 +51,28 @@ const updateClient = async (clientId, clientData) => {
   return response.data;
 };
 
+const getUsers = async () => {
+  const response = await api.get('/users');
+  return response.data;
+};
+
+const createUser = async (userData) => {
+  const response = await api.post('/users', userData);
+  return response.data;
+};
+
+const deleteUser = async (userId) => {
+  await api.delete(`/users/${userId}`);
+};
+
+const activateUser = async (userId) => {
+  await api.post(`/users/${userId}/activate`);
+};
+
+const deactivateUser = async (userId) => {
+  await api.post(`/users/${userId}/deactivate`);
+};
+
 export default {
   login,
   logout,
@@ -59,5 +81,10 @@ export default {
   getMessageDetails,
   getClients,
   createClient,
-  updateClient
+  updateClient,
+  getUsers,
+  createUser,
+  deleteUser,
+  activateUser,
+  deactivateUser
 };

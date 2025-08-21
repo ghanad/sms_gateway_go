@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import MessageHistoryPage from './pages/MessageHistoryPage.jsx';
 import MessageDetailPage from './pages/MessageDetailPage.jsx';
 import ClientManagementPage from './pages/admin/ClientManagementPage.jsx';
+import UserManagementPage from './pages/admin/UserManagementPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
               <Route path="/messages/:trackingId" element={<MessageDetailPage />} />
               <Route element={<AdminRoute />}>
                 <Route path="/admin/clients" element={<ClientManagementPage />} />
+                <Route path="/admin/users" element={<UserManagementPage />} />
               </Route>
             </Route>
           </Route>
