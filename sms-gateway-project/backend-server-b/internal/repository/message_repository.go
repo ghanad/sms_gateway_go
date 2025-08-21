@@ -53,3 +53,51 @@ func (r *MessageRepository) CreateMessageEvent(trackingID, description string) e
 	event := models.MessageEvent{MessageID: msg.ID, Event: description}
 	return r.DB.Create(&event).Error
 }
+
+// DashboardStats represents summary statistics for the dashboard.
+
+type DashboardStats struct {
+	Total     int64 `json:"total"`
+	Sent      int64 `json:"sent"`
+	Delivered int64 `json:"delivered"`
+	Failed    int64 `json:"failed"`
+}
+
+// GetDashboardStats calculates and returns dashboard statistics.
+
+func (r *MessageRepository) GetDashboardStats() (DashboardStats, error) {
+	var stats DashboardStats
+
+	// Total messages
+	if err := r.DB.Model(&models.Message{}).Count(&stats.Total).Error; err != nil {
+		return stats, err
+	}
+
+	// Sent messages (you might need to adjust the status values based on your application logic)
+	if err := r.DB.Model(&models.Message{}).Where("status = ?", "SENT").Count(&stats.Sent).Error; err != nil {
+		return stats, err
+	}
+
+	// Delivered messages
+	if err := r.DB.Model(&models.Message{}).Where("status = ?", "DELIVERED").Count(&stats.Delivered).Error; err != nil {
+		return stats, err
+	}
+
+	// Failed messages
+	if err := r.DB.Model(&models.Message{}).Where("status LIKE ?", "FAILED%").Count(&stats.Failed).Error; err != nil {
+		return stats, err
+	}
+
+	return stats, nil
+}
+
+func (r *MessageRepository) GetMessages(limit, offset int) ([]models.Message, int64, error) {
+	var messages []models.Message
+	var total int64
+
+	r.DB.Model(&models.Message{}).Count(&total)
+
+	err := r.DB.Order("created_at desc").Limit(limit).Offset(offset).Find(&messages).Error
+
+	return messages, total, err
+}

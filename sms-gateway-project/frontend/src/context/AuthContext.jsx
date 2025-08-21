@@ -6,7 +6,10 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
+    if (stored && stored !== 'undefined') {
+      return JSON.parse(stored);
+    }
+    return null;
   });
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const isAuthenticated = !!token;
