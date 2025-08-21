@@ -16,8 +16,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
+          <Route element={<Layout />}>
+            <Route element={<ProtectedRoute />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/messages" element={<MessageHistoryPage />} />
               <Route path="/messages/:trackingId" element={<MessageDetailPage />} />

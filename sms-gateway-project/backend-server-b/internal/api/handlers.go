@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -85,4 +86,41 @@ func (h *Handlers) LoginHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (h *Handlers) GetDashboardStatsHandler(c *gin.Context) {
+	stats, err := h.MessageRepo.GetDashboardStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get stats"})
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
+
+func (h *Handlers) GetMessagesHandler(c *gin.Context) {
+	limit := c.DefaultQuery("limit", "10")
+	offset := c.DefaultQuery("offset", "0")
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit"})
+		return
+	}
+
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid offset"})
+		return
+	}
+
+	messages, total, err := h.MessageRepo.GetMessages(limitInt, offsetInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get messages"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"items": messages,
+		"total": total,
+	})
 }

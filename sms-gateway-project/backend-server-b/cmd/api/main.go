@@ -69,6 +69,8 @@ func main() {
 
 	apiRoutes := r.Group("/api")
 	apiRoutes.Use(api.AuthMiddleware(jwtSvc))
+	apiRoutes.GET("/dashboard", handlers.GetDashboardStatsHandler)
+	apiRoutes.GET("/messages", handlers.GetMessagesHandler)
 	apiRoutes.GET("/status/:tracking_id", handlers.GetStatusHandler)
 	apiRoutes.POST("/webhooks/delivery-report/:provider", handlers.DeliveryWebhookHandler)
 
