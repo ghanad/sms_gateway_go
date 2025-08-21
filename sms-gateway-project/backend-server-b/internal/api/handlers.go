@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"sms-gateway/backend-server-b/internal/models"
 	"sms-gateway/backend-server-b/internal/repository"
 	"sms-gateway/backend-server-b/internal/services"
 )
@@ -73,7 +74,7 @@ func (h *Handlers) LoginHandler(c *gin.Context) {
 		return
 	}
 	user, err := h.UserRepo.GetUserByUsername(req.Username)
-	if err != nil {
+	if err != nil || !user.IsActive {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
@@ -81,7 +82,7 @@ func (h *Handlers) LoginHandler(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
-	token, err := h.JWTService.GenerateToken(user.Username, user.ID, true)
+	token, err := h.JWTService.GenerateToken(user.Username, user.ID, user.IsAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
 		return
@@ -141,4 +142,99 @@ func (h *Handlers) GetMessagesHandler(c *gin.Context) {
 		"items": messages,
 		"total": total,
 	})
+}
+
+// UserRequest represents the payload for creating a user.
+type UserRequest struct {
+	Username   string `json:"username"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	Extension  string `json:"extension"`
+	Department string `json:"department"`
+	Password   string `json:"password"`
+	APIKey     string `json:"api_key"`
+	IsAdmin    bool   `json:"is_admin"`
+	IsActive   bool   `json:"is_active"`
+}
+
+// CreateUserHandler adds a new user.
+func (h *Handlers) CreateUserHandler(c *gin.Context) {
+	var req UserRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not hash password"})
+		return
+	}
+	user := models.UIUser{
+		Username:   req.Username,
+		Name:       req.Name,
+		Phone:      req.Phone,
+		Extension:  req.Extension,
+		Department: req.Department,
+		Password:   string(hashed),
+		APIKey:     req.APIKey,
+		IsAdmin:    req.IsAdmin,
+		IsActive:   req.IsActive,
+	}
+	if err := h.UserRepo.CreateUser(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create user"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": user.ID})
+}
+
+// ListUsersHandler returns all users.
+func (h *Handlers) ListUsersHandler(c *gin.Context) {
+	users, err := h.UserRepo.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not list users"})
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
+
+// DeleteUserHandler removes a user by ID.
+func (h *Handlers) DeleteUserHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	if err := h.UserRepo.DeleteUser(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not delete user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
+}
+
+// ActivateUserHandler sets a user's active status to true.
+func (h *Handlers) ActivateUserHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	if err := h.UserRepo.SetActive(uint(id), true); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not activate user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "activated"})
+}
+
+// DeactivateUserHandler sets a user's active status to false.
+func (h *Handlers) DeactivateUserHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	if err := h.UserRepo.SetActive(uint(id), false); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not deactivate user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "deactivated"})
 }

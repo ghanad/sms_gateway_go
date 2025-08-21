@@ -75,6 +75,14 @@ func main() {
 	apiRoutes.GET("/status/:tracking_id", handlers.GetStatusHandler)
 	apiRoutes.POST("/webhooks/delivery-report/:provider", handlers.DeliveryWebhookHandler)
 
+	userRoutes := apiRoutes.Group("/users")
+	userRoutes.Use(api.AdminOnlyMiddleware())
+	userRoutes.GET("", handlers.ListUsersHandler)
+	userRoutes.POST("", handlers.CreateUserHandler)
+	userRoutes.DELETE(":id", handlers.DeleteUserHandler)
+	userRoutes.POST(":id/activate", handlers.ActivateUserHandler)
+	userRoutes.POST(":id/deactivate", handlers.DeactivateUserHandler)
+
 	if err := r.Run(cfg.ListenAddr); err != nil {
 		log.Fatalf("server: %v", err)
 	}

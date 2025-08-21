@@ -33,10 +33,17 @@ type Client struct {
 
 // UIUser represents a web panel user.
 type UIUser struct {
-	ID       uint `gorm:"primaryKey"`
-	Username string
-	Password string
-	Clients  []Client `gorm:"many2many:client_user_associations"`
+	ID         uint `gorm:"primaryKey"`
+	Username   string
+	Name       string
+	Phone      string
+	Extension  string
+	Department string
+	Password   string
+	APIKey     string
+	IsActive   bool
+	IsAdmin    bool
+	Clients    []Client `gorm:"many2many:client_user_associations"`
 }
 
 // ClientUserAssociation is the join table between UIUser and Client.
