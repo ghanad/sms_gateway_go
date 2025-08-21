@@ -14,5 +14,5 @@ func ConnectDatabase(dsn string) (*gorm.DB, error) {
 
 // AutoMigrate runs GORM auto-migrations for all models.
 func AutoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(&models.Message{}, &models.MessageEvent{}, &models.Client{}, &models.UIUser{}, &models.ClientUserAssociation{})
+        return db.AutoMigrate(&models.Message{}, &models.MessageEvent{}, &models.UIUser{})
 }

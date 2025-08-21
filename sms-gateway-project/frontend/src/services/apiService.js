@@ -36,21 +36,6 @@ const getMessageDetails = async (trackingId) => {
   return response.data;
 };
 
-const getClients = async () => {
-  const response = await api.get('/admin/clients');
-  return response.data;
-};
-
-const createClient = async (clientData) => {
-  const response = await api.post('/admin/clients', clientData);
-  return response.data;
-};
-
-const updateClient = async (clientId, clientData) => {
-  const response = await api.put(`/admin/clients/${clientId}`, clientData);
-  return response.data;
-};
-
 const getUsers = async () => {
   const response = await api.get('/users');
   return response.data;
@@ -79,9 +64,6 @@ export default {
   getDashboardStats,
   getMessages,
   getMessageDetails,
-  getClients,
-  createClient,
-  updateClient,
   getUsers,
   createUser,
   deleteUser,

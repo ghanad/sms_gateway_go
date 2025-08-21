@@ -25,7 +25,7 @@ func SeedAdminUser(repo *repository.UserRepository, username, password string) e
 		if err != nil {
 			return err
 		}
-		user = models.UIUser{Username: username, Password: string(hashed), IsAdmin: true, IsActive: true}
+                user = models.UIUser{Username: username, Password: string(hashed), IsAdmin: true, IsActive: true, DailyQuota: 0}
 		return repo.CreateUser(&user)
 	}
 

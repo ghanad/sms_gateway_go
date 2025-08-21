@@ -23,6 +23,7 @@ const UserManagementPage = () => {
   const [department, setDepartment] = useState('');
   const [password, setPassword] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [dailyQuota, setDailyQuota] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
@@ -36,6 +37,7 @@ const UserManagementPage = () => {
       extension: u.Extension,
       department: u.Department,
       api_key: u.APIKey,
+      daily_quota: u.DailyQuota,
       is_admin: u.IsAdmin,
       is_active: u.IsActive
     }));
@@ -55,6 +57,7 @@ const UserManagementPage = () => {
       department,
       password,
       api_key: apiKey,
+      daily_quota: dailyQuota,
       is_admin: isAdmin,
       is_active: isActive
     });
@@ -66,6 +69,7 @@ const UserManagementPage = () => {
     setDepartment('');
     setPassword('');
     setApiKey('');
+    setDailyQuota('');
     setIsAdmin(false);
     setIsActive(true);
     fetchUsers();
@@ -92,6 +96,7 @@ const UserManagementPage = () => {
     { field: 'extension', headerName: 'Extension', flex: 1 },
     { field: 'department', headerName: 'Department', flex: 1 },
     { field: 'api_key', headerName: 'API Key', flex: 1 },
+    { field: 'daily_quota', headerName: 'Daily Quota', flex: 1 },
     { field: 'is_admin', headerName: 'Admin', flex: 0.5 },
     { field: 'is_active', headerName: 'Active', flex: 0.5 },
     {
@@ -126,6 +131,7 @@ const UserManagementPage = () => {
           <TextField label="Department" fullWidth margin="normal" value={department} onChange={(e) => setDepartment(e.target.value)} />
           <TextField label="Password" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
           <TextField label="API Key" fullWidth margin="normal" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+          <TextField label="Daily Quota" fullWidth margin="normal" value={dailyQuota} onChange={(e) => setDailyQuota(e.target.value)} />
           <FormControlLabel control={<Checkbox checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} />} label="Admin" />
           <FormControlLabel control={<Checkbox checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />} label="Active" />
           <Button variant="contained" onClick={handleCreate}>Save</Button>

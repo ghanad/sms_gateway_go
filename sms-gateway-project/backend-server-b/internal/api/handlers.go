@@ -146,15 +146,16 @@ func (h *Handlers) GetMessagesHandler(c *gin.Context) {
 
 // UserRequest represents the payload for creating a user.
 type UserRequest struct {
-	Username   string `json:"username"`
-	Name       string `json:"name"`
-	Phone      string `json:"phone"`
-	Extension  string `json:"extension"`
-	Department string `json:"department"`
-	Password   string `json:"password"`
-	APIKey     string `json:"api_key"`
-	IsAdmin    bool   `json:"is_admin"`
-	IsActive   bool   `json:"is_active"`
+        Username   string `json:"username"`
+        Name       string `json:"name"`
+        Phone      string `json:"phone"`
+        Extension  string `json:"extension"`
+        Department string `json:"department"`
+        Password   string `json:"password"`
+        APIKey     string `json:"api_key"`
+        DailyQuota int    `json:"daily_quota"`
+        IsAdmin    bool   `json:"is_admin"`
+        IsActive   bool   `json:"is_active"`
 }
 
 // CreateUserHandler adds a new user.
@@ -174,12 +175,13 @@ func (h *Handlers) CreateUserHandler(c *gin.Context) {
 		Name:       req.Name,
 		Phone:      req.Phone,
 		Extension:  req.Extension,
-		Department: req.Department,
-		Password:   string(hashed),
-		APIKey:     req.APIKey,
-		IsAdmin:    req.IsAdmin,
-		IsActive:   req.IsActive,
-	}
+                Department: req.Department,
+                Password:   string(hashed),
+                APIKey:     req.APIKey,
+                DailyQuota: req.DailyQuota,
+                IsAdmin:    req.IsAdmin,
+                IsActive:   req.IsActive,
+        }
 	if err := h.UserRepo.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create user"})
 		return
