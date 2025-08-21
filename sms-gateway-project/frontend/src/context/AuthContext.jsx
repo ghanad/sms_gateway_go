@@ -16,9 +16,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const data = await apiService.login(username, password);
-    setUser(data.user);
+    const payload = JSON.parse(atob(data.token.split('.')[1]));
+    const userInfo = { username: payload.username, id: payload.user_id, isAdmin: payload.is_admin };
+    setUser(userInfo);
     setToken(data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('user', JSON.stringify(userInfo));
     localStorage.setItem('token', data.token);
   };
 

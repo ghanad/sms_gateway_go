@@ -15,17 +15,33 @@ func SeedAdminUser(repo *repository.UserRepository, username, password string) e
 	if username == "" || password == "" {
 		return nil
 	}
-	_, err := repo.GetUserByUsername(username)
-	if err == nil {
-		return nil // user already exists
-	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	user, err := repo.GetUserByUsername(username)
 	if err != nil {
-		return err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		// user does not exist; create it
+		hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+                user = models.UIUser{Username: username, Password: string(hashed), IsAdmin: true, IsActive: true, DailyQuota: 0}
+		return repo.CreateUser(&user)
 	}
-	user := models.UIUser{Username: username, Password: string(hashed)}
-	return repo.CreateUser(&user)
+
+	// user exists; ensure credentials and flags match configuration
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashed)
+	}
+	if !user.IsAdmin {
+		user.IsAdmin = true
+	}
+	if !user.IsActive {
+		user.IsActive = true
+	}
+	return repo.UpdateUser(&user)
 }

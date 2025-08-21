@@ -28,3 +28,15 @@ func AuthMiddleware(jwtSvc *services.JWTService) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// AdminOnlyMiddleware ensures the requester has admin privileges.
+func AdminOnlyMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		isAdmin, ok := c.Get("isAdmin")
+		if !ok || !isAdmin.(bool) {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+			return
+		}
+		c.Next()
+	}
+}

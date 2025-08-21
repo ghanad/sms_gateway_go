@@ -3,7 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const Layout = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -18,7 +18,9 @@ const Layout = () => {
         <nav className="flex gap-9 text-gray-900 items-center">
           <Link className="text-sm font-medium" to="/">Dashboard</Link>
           <Link className="text-sm font-medium" to="/messages">Messages</Link>
-          <Link className="text-sm font-medium" to="/admin/clients">Clients</Link>
+          {user?.isAdmin && (
+            <Link className="text-sm font-medium" to="/admin/users">Users</Link>
+          )}
           <button className="text-sm font-medium" onClick={handleLogout}>Logout</button>
         </nav>
       </header>
