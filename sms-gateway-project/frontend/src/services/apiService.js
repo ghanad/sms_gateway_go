@@ -46,6 +46,11 @@ const createUser = async (userData) => {
   return response.data;
 };
 
+const updateUser = async (userId, userData) => {
+  const response = await api.put(`/users/${userId}`, userData);
+  return response.data;
+};
+
 const deleteUser = async (userId) => {
   await api.delete(`/users/${userId}`);
 };
@@ -66,6 +71,7 @@ export default {
   getMessageDetails,
   getUsers,
   createUser,
+  updateUser,
   deleteUser,
   activateUser,
   deactivateUser

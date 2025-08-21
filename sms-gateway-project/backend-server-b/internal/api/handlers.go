@@ -146,16 +146,16 @@ func (h *Handlers) GetMessagesHandler(c *gin.Context) {
 
 // UserRequest represents the payload for creating a user.
 type UserRequest struct {
-        Username   string `json:"username"`
-        Name       string `json:"name"`
-        Phone      string `json:"phone"`
-        Extension  string `json:"extension"`
-        Department string `json:"department"`
-        Password   string `json:"password"`
-        APIKey     string `json:"api_key"`
-        DailyQuota int    `json:"daily_quota"`
-        IsAdmin    bool   `json:"is_admin"`
-        IsActive   bool   `json:"is_active"`
+	Username   string `json:"username"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	Extension  string `json:"extension"`
+	Department string `json:"department"`
+	Password   string `json:"password"`
+	APIKey     string `json:"api_key"`
+	DailyQuota int    `json:"daily_quota"`
+	IsAdmin    bool   `json:"is_admin"`
+	IsActive   bool   `json:"is_active"`
 }
 
 // CreateUserHandler adds a new user.
@@ -175,13 +175,13 @@ func (h *Handlers) CreateUserHandler(c *gin.Context) {
 		Name:       req.Name,
 		Phone:      req.Phone,
 		Extension:  req.Extension,
-                Department: req.Department,
-                Password:   string(hashed),
-                APIKey:     req.APIKey,
-                DailyQuota: req.DailyQuota,
-                IsAdmin:    req.IsAdmin,
-                IsActive:   req.IsActive,
-        }
+		Department: req.Department,
+		Password:   string(hashed),
+		APIKey:     req.APIKey,
+		DailyQuota: req.DailyQuota,
+		IsAdmin:    req.IsAdmin,
+		IsActive:   req.IsActive,
+	}
 	if err := h.UserRepo.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create user"})
 		return
@@ -239,4 +239,49 @@ func (h *Handlers) DeactivateUserHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "deactivated"})
+}
+
+// UpdateUserHandler updates an existing user.
+func (h *Handlers) UpdateUserHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	var req UserRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	user, err := h.UserRepo.GetUserByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+
+	user.Username = req.Username
+	user.Name = req.Name
+	user.Phone = req.Phone
+	user.Extension = req.Extension
+	user.Department = req.Department
+	user.APIKey = req.APIKey
+	user.DailyQuota = req.DailyQuota
+	user.IsAdmin = req.IsAdmin
+	user.IsActive = req.IsActive
+	if req.Password != "" {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not hash password"})
+			return
+		}
+		user.Password = string(hashed)
+	}
+
+	if err := h.UserRepo.UpdateUser(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "updated"})
 }
