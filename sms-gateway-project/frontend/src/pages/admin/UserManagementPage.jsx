@@ -1,262 +1,424 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Box, TextField, FormControlLabel, Checkbox } from '@mui/material';
-import apiService from '../../services/apiService.js';
-import UserActionsDropdown from '../../components/UserActionsDropdown.jsx';
-import { useToast } from '../../context/ToastContext.jsx';
+// Path: sms-gateway-project/frontend/src/pages/admin/UserManagementPage.jsx
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  backgroundColor: 'white',
-  padding: '16px',
-  borderRadius: '8px',
-  boxShadow: '0 4px 6px rgba(0, 0,0, 0.1)',
-};
+import React, { useEffect, useMemo, useState } from "react";
+import AddUserModal from "../../components/AddUserModal.jsx";
+import apiService from "../../services/apiService.js";
+import { useToast } from "../../context/ToastContext.jsx";
 
-const UserManagementPage = () => {
+/**
+ * Tailwind replacement for pages/admin/UserManagementPage.jsx
+ * - English only, no dark mode
+ * - Consistent with Login and AddUserModal styles
+ * - Uses your existing apiService endpoints
+ * - Create via AddUserModal; Edit via inline EditUserModal (below)
+ */
+
+export default function UserManagementPage() {
   const { addToast } = useToast();
+
+  // data
   const [users, setUsers] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [extension, setExtension] = useState('');
-  const [department, setDepartment] = useState('');
-  const [password, setPassword] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [dailyQuota, setDailyQuota] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isActive, setIsActive] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const fetchUsers = async () => {
-    const data = await apiService.getUsers();
-    const formatted = data.map((u) => ({
-      id: u.ID,
-      username: u.Username,
-      name: u.Name,
-      phone: u.Phone,
-      extension: u.Extension,
-      department: u.Department,
-      api_key: u.APIKey,
-      daily_quota: u.DailyQuota,
-      is_admin: u.IsAdmin,
-      is_active: u.IsActive
-    }));
-    setUsers(formatted);
-  };
+  // ui state
+  const [q, setQ] = useState("");
+  const [sortKey, setSortKey] = useState("name");
+  const [sortDir, setSortDir] = useState("asc");
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // modals
+  const [openCreate, setOpenCreate] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
-  const resetForm = () => {
-    setUsername('');
-    setName('');
-    setPhone('');
-    setExtension('');
-    setDepartment('');
-    setPassword('');
-    setApiKey('');
-    setDailyQuota('');
-    setIsAdmin(false);
-    setIsActive(true);
-  };
-
-  const handleOpenCreate = () => {
-    setEditingId(null);
-    resetForm();
-    setOpen(true);
-  };
-
-  const handleOpenEdit = (user) => {
-    setEditingId(user.id);
-    setUsername(user.username);
-    setName(user.name);
-    setPhone(user.phone);
-    setExtension(user.extension);
-    setDepartment(user.department);
-    setPassword('');
-    setApiKey(user.api_key);
-    setDailyQuota(user.daily_quota);
-    setIsAdmin(user.is_admin);
-    setIsActive(user.is_active);
-    setOpen(true);
-  };
-
-  const handleSave = async () => {
-    const payload = {
-      username,
-      name,
-      phone,
-      extension,
-      department,
-      password,
-      api_key: apiKey,
-      daily_quota: dailyQuota ? parseInt(dailyQuota, 10) : null, // Convert to number or null
-      is_admin: isAdmin,
-      is_active: isActive
-    };
+  async function load() {
+    setLoading(true);
+    setError("");
     try {
-      if (editingId) {
-        await apiService.updateUser(editingId, payload);
-        addToast('User updated successfully!', 'success');
-      } else {
-        await apiService.createUser(payload);
-        addToast('User created successfully!', 'success');
-      }
-      setOpen(false);
-      resetForm();
-      setEditingId(null);
-      fetchUsers();
-    } catch (error) {
-      addToast(`Error saving user: ${error.message}`, 'error');
+      const data = await apiService.getUsers();
+      const formatted = (data || []).map((u) => ({
+        id: u.ID,
+        username: u.Username,
+        name: u.Name,
+        phone: u.Phone,
+        extension: u.Extension,
+        department: u.Department,
+        api_key: u.APIKey,
+        daily_quota: u.DailyQuota,
+        is_admin: u.IsAdmin,
+        is_active: u.IsActive,
+      }));
+      setUsers(formatted);
+    } catch (e) {
+      setError(e?.message || "Failed to load users");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const handleDelete = async (id) => {
+  useEffect(() => { load(); }, []);
+
+  function onSort(key) {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir("asc"); }
+  }
+
+  const filteredSorted = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const filtered = needle
+      ? users.filter((u) =>
+          [u.name, u.username, u.phone, u.department].some((x) => String(x || "").toLowerCase().includes(needle))
+        )
+      : users;
+    const sorted = [...filtered].sort((a, b) => {
+      const A = (a[sortKey] ?? "").toString().toLowerCase();
+      const B = (b[sortKey] ?? "").toString().toLowerCase();
+      if (A < B) return sortDir === "asc" ? -1 : 1;
+      if (A > B) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [users, q, sortKey, sortDir]);
+
+  // actions
+  async function handleCreate(payload) {
     try {
-      await apiService.deleteUser(id);
-      addToast('User deleted successfully!', 'success');
-      fetchUsers();
-    } catch (error) {
-      addToast(`Error deleting user: ${error.message}`, 'error');
+      const dq = payload.daily_quota === "" ? null : Number(payload.daily_quota);
+      await apiService.createUser({
+        username: payload.username,
+        name: payload.name,
+        phone: payload.phone,
+        extension: payload.extension,
+        department: payload.department,
+        password: payload.password,
+        api_key: payload.api_key,
+        daily_quota: dq,
+        is_admin: !!payload.is_admin || payload.role === "admin",
+        is_active: payload.is_active ?? payload.active ?? true,
+      });
+      addToast("User created successfully!", "success");
+      setOpenCreate(false);
+      await load();
+    } catch (e) {
+      addToast(e?.response?.data?.message || e?.message || "Failed to create user", "error");
     }
-  };
+  }
 
-  const handleToggleActive = async (user) => {
+  async function handleUpdate(id, payload) {
+    try {
+      const dq = payload.daily_quota === "" ? null : Number(payload.daily_quota);
+      // Build update body and OMIT password if empty → prevents backend failure
+      const body = {
+        username: payload.username,
+        name: payload.name,
+        phone: payload.phone,
+        extension: payload.extension,
+        department: payload.department,
+        api_key: payload.api_key,
+        daily_quota: dq,
+        is_admin: payload.is_admin,
+        is_active: payload.is_active,
+      };
+      if (payload.password) body.password = payload.password;
+
+      await apiService.updateUser(id, body);
+      addToast("User updated successfully!", "success");
+      setEditingUser(null);
+      await load();
+    } catch (e) {
+      addToast(e?.response?.data?.message || e?.message || "Failed to update user", "error");
+    }
+  }
+
+  async function handleDelete(user) {
+    if (!confirm(`Delete user "${user.username}"?`)) return;
+    try {
+      await apiService.deleteUser(user.id);
+      addToast("User deleted successfully!", "success");
+      await load();
+    } catch (e) {
+      addToast(e?.response?.data?.message || e?.message || "Failed to delete user", "error");
+    }
+  }
+
+  async function handleToggleActive(user) {
     try {
       if (user.is_active) {
         await apiService.deactivateUser(user.id);
-        addToast('User deactivated successfully!', 'success');
+        addToast("User deactivated successfully!", "success");
       } else {
         await apiService.activateUser(user.id);
-        addToast('User activated successfully!', 'success');
+        addToast("User activated successfully!", "success");
       }
-      fetchUsers();
-    } catch (error) {
-      addToast(`Error toggling user status: ${error.message}`, 'error');
+      await load();
+    } catch (e) {
+      addToast(e?.response?.data?.message || e?.message || "Failed to toggle user", "error");
     }
-  };
-
+  }
 
   return (
-    <div className="layout-content-container flex flex-col flex-1">
-      <div className="flex flex-wrap justify-between gap-3 p-4">
-        <div className="flex min-w-72 flex-col gap-3">
-          <p className="text-[#111418] tracking-light text-[32px] font-bold leading-tight">User Management</p>
-          <p className="text-[#60758a] text-sm font-normal leading-normal">Manage users and their access levels within the SMS Gateway system.</p>
-        </div>
-        <button
-          className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-[#f0f2f5] text-[#111418] text-sm font-medium leading-normal"
-          onClick={handleOpenCreate}
-        >
-          <span className="truncate">Add User</span>
-        </button>
-      </div>
-
-      <div className="px-4 py-3">
-        <label className="flex flex-col min-w-40 h-12 w-full">
-          <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
-            <div
-              className="text-[#60758a] flex border-none bg-[#f0f2f5] items-center justify-center pl-4 rounded-l-lg border-r-0"
-              data-icon="MagnifyingGlass"
-              data-size="24px"
-              data-weight="regular"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                <path
-                  d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
-                ></path>
-              </svg>
-            </div>
-            <input
-              placeholder="Search users..."
-              className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] focus:outline-0 focus:ring-0 border-none bg-[#f0f2f5] focus:border-none h-full placeholder:text-[#60758a] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
-              value=""
-            />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6" dir="ltr">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">User Management</h1>
+            <p className="text-sm text-slate-600">Manage users and their access levels.</p>
           </div>
-        </label>
-      </div>
-
-      <div className="px-4 py-3 @container">
-        <div className="flex rounded-lg border border-[#dbe0e6] bg-white">
-          <table className="flex-1">
-            <thead>
-              <tr className="bg-white">
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-120 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Name</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-240 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Username</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-360 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Phone</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-480 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Extension</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-600 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Department</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-720 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">API Key</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-840 px-4 py-3 text-left text-[#111418] w-[400px] text-sm font-medium leading-normal">Daily Quota</th>
-                <th className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-960 px-4 py-3 text-left text-[#111418] w-60 text-sm font-medium leading-normal">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className={`border-t border-t-[#dbe0e6] ${!user.is_active ? 'deactivated-user' : ''}`}>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">{user.name}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.username}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.phone}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-480 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.extension}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-600 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.department}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-720 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.api_key}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-840 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.daily_quota}</td>
-                  <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-960 h-[72px] px-4 py-2 w-60 text-[#60758a] text-sm font-bold leading-normal tracking-[0.015em] relative">
-                    <UserActionsDropdown user={user} handleOpenEdit={handleOpenEdit} handleToggleActive={handleToggleActive} handleDelete={handleDelete} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <style>{`
-            @container(max-width:120px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-120{display: none;}}
-            @container(max-width:240px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-240{display: none;}}
-            @container(max-width:360px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-360{display: none;}}
-            @container(max-width:480px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-480{display: none;}}
-            @container(max-width:600px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-600{display: none;}}
-            @container(max-width:720px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-720{display: none;}}
-            @container(max-width:840px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-840{display: none;}}
-            @container(max-width:960px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-960{display: none;}}
-            @container(max-width:1080px){.table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-1080{display: none;}}
-          `}</style>
+          <button
+            onClick={() => setOpenCreate(true)}
+            className="rounded-xl bg-slate-900 text-white px-4 py-2.5 font-medium shadow hover:shadow-md"
+          >
+            Add user
+          </button>
         </div>
+
+        {/* Card */}
+        <section className="rounded-2xl bg-white/80 backdrop-blur shadow-lg ring-1 ring-black/5">
+          <div className="p-4 md:p-6">
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search users..."
+                  className="w-72 max-w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent"
+                />
+              </div>
+              <div className="text-sm text-slate-600">Total: {users.length}</div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead>
+                  <tr className="text-slate-700">
+                    <Th onClick={() => onSort('name')} active={sortKey==='name'} dir={sortDir}>Name</Th>
+                    <Th onClick={() => onSort('username')} active={sortKey==='username'} dir={sortDir}>Username</Th>
+                    <Th onClick={() => onSort('phone')} active={sortKey==='phone'} dir={sortDir}>Phone</Th>
+                    <Th onClick={() => onSort('extension')} active={sortKey==='extension'} dir={sortDir}>Extension</Th>
+                    <Th onClick={() => onSort('department')} active={sortKey==='department'} dir={sortDir}>Department</Th>
+                    <Th onClick={() => onSort('api_key')} active={sortKey==='api_key'} dir={sortDir}>API Key</Th>
+                    <Th onClick={() => onSort('daily_quota')} active={sortKey==='daily_quota'} dir={sortDir}>Daily Quota</Th>
+                    <th className="px-3 py-2 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {loading && (
+                    <tr><td colSpan={8} className="px-3 py-10 text-center text-slate-500">Loading…</td></tr>
+                  )}
+
+                  {!loading && filteredSorted.length === 0 && (
+                    <tr><td colSpan={8} className="px-3 py-10 text-center text-slate-500">No users found</td></tr>
+                  )}
+
+                  {!loading && filteredSorted.map((u) => (
+                    <tr key={u.id} className={u.is_active ? "hover:bg-slate-50" : "hover:bg-slate-50 opacity-70"}>
+                      <td className="px-3 py-2 font-medium text-slate-900">{u.name || '-'}</td>
+                      <td className="px-3 py-2 text-slate-700">{u.username}</td>
+                      <td className="px-3 py-2 text-slate-700">{u.phone || '-'}</td>
+                      <td className="px-3 py-2 text-slate-700">{u.extension || '-'}</td>
+                      <td className="px-3 py-2 text-slate-700">{u.department || '-'}</td>
+                      <td className="px-3 py-2 text-slate-700">{u.api_key || '-'}</td>
+                      <td className="px-3 py-2 text-slate-700">{u.daily_quota ?? '-'}</td>
+                      <td className="px-3 py-2 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={() => setEditingUser(u)}
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 hover:shadow"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleToggleActive(u)}
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 hover:shadow"
+                          >
+                            {u.is_active ? 'Disable' : 'Enable'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u)}
+                            className="rounded-xl bg-rose-600 text-white px-3 py-1.5 text-sm hover:shadow"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box sx={modalStyle}>
-          <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit User' : 'Create User'}</h2>
-          <TextField label="Username *" fullWidth margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} />
-          <TextField label="Name" fullWidth margin="normal" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="Phone" fullWidth margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} />
-          <TextField label="Extension" fullWidth margin="normal" value={extension} onChange={(e) => setExtension(e.target.value)} />
-          <TextField label="Department" fullWidth margin="normal" value={department} onChange={(e) => setDepartment(e.target.value)} />
-          <TextField label="Password *" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <TextField label="API Key" fullWidth margin="normal" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-          <TextField label="Daily Quota" fullWidth margin="normal" value={dailyQuota} onChange={(e) => setDailyQuota(e.target.value)} />
-          <FormControlLabel control={<Checkbox checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} />} label="Admin" />
-          <FormControlLabel control={<Checkbox checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />} label="Active" />
-          <button
-            className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-          <button
-            className="mt-4 ml-2 border border-gray-300 text-gray-700 hover:bg-gray-100 py-2 px-4 rounded"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </button>
-        </Box>
-      </Modal>
+      {/* Create Modal */}
+      <AddUserModal
+        isOpen={openCreate}
+        onClose={() => setOpenCreate(false)}
+        onCreate={handleCreate}
+      />
+
+      {/* Edit Modal */}
+      <EditUserModal
+        user={editingUser}
+        onClose={() => setEditingUser(null)}
+        onSave={(payload) => handleUpdate(editingUser.id, payload)}
+      />
     </div>
   );
-};
+}
 
-export default UserManagementPage;
+function Th({ children, onClick, active, dir }) {
+  return (
+    <th className="px-3 py-2 select-none cursor-pointer" onClick={onClick} title="Sort">
+      <span className="inline-flex items-center gap-1">
+        {children}
+        {active && (<span aria-hidden="true" className="text-slate-400">{dir === 'asc' ? '▲' : '▼'}</span>)}
+      </span>
+    </th>
+  );
+}
+
+// Inline Tailwind Edit Modal tailored to your fields
+function EditUserModal({ user, onClose, onSave }) {
+  const [form, setForm] = useState(() => initial(user));
+  const [error, setError] = useState("");
+
+  useEffect(() => { setForm(initial(user)); setError(""); }, [user]);
+  if (!user) return null;
+
+  function initial(u) {
+    if (!u) return {
+      username: "", name: "", phone: "", extension: "", department: "",
+      password: "", api_key: "", daily_quota: "", is_admin: false, is_active: true,
+    };
+    return {
+      username: u.username || "",
+      name: u.name || "",
+      phone: u.phone || "",
+      extension: u.extension || "",
+      department: u.department || "",
+      password: "", // optional on edit
+      api_key: u.api_key || "",
+      daily_quota: u.daily_quota ?? "",
+      is_admin: !!u.is_admin,
+      is_active: !!u.is_active,
+    };
+  }
+
+  function handleChange(e) {
+    const { name, value, type, checked } = e.target;
+    setForm((s) => ({ ...s, [name]: type === "checkbox" ? checked : value }));
+  }
+
+  function validate() {
+    if (!form.username.trim()) return "Username is required";
+    if (form.daily_quota !== "" && Number.isNaN(Number(form.daily_quota))) return "Daily quota must be a number";
+    return "";
+  }
+
+  async function submit(e) {
+    e.preventDefault();
+    const v = validate();
+    if (v) return setError(v);
+    setError("");
+
+    // Build payload and OMIT password if empty
+    const payload = {
+      username: form.username,
+      name: form.name,
+      phone: form.phone,
+      extension: form.extension,
+      department: form.department,
+      api_key: form.api_key,
+      daily_quota: form.daily_quota,
+      is_admin: form.is_admin,
+      is_active: form.is_active,
+    };
+    if (form.password) payload.password = form.password;
+
+    await onSave(payload);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="edit-user-title">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="w-full max-w-xl rounded-2xl bg-white shadow-lg ring-1 ring-black/5">
+          <form onSubmit={submit} className="p-6 md:p-8 space-y-5" noValidate>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="edit-user-title" className="text-xl font-semibold text-slate-900">Edit user</h2>
+                <p className="mt-1 text-sm text-slate-600">Update user details.</p>
+              </div>
+              <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-2 hover:bg-slate-100">×</button>
+            </div>
+
+            {error && (
+              <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-2">{error}</p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="username">Username</label>
+                <input id="username" name="username" value={form.username} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="name">Name</label>
+                <input id="name" name="name" value={form.name} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="phone">Phone</label>
+                <input id="phone" name="phone" value={form.phone} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="extension">Extension</label>
+                <input id="extension" name="extension" value={form.extension} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="department">Department</label>
+                <input id="department" name="department" value={form.department} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="password">Password (optional)</label>
+                <input id="password" name="password" type="password" value={form.password} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="api_key">API Key</label>
+                <input id="api_key" name="api_key" value={form.api_key} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="daily_quota">Daily Quota</label>
+                <input id="daily_quota" name="daily_quota" value={form.daily_quota} onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+              </div>
+              <div className="flex items-center gap-2 pt-7">
+                <input id="is_admin" name="is_admin" type="checkbox" checked={form.is_admin} onChange={handleChange}
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-600" />
+                <label htmlFor="is_admin" className="text-sm text-slate-700">Admin</label>
+              </div>
+              <div className="flex items-center gap-2 pt-7">
+                <input id="is_active" name="is_active" type="checkbox" checked={form.is_active} onChange={handleChange}
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-600" />
+                <label htmlFor="is_active" className="text-sm text-slate-700">Active</label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button type="button" onClick={onClose} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-800 hover:shadow">Cancel</button>
+              <button type="submit" className="rounded-xl bg-slate-900 text-white px-4 py-2.5 font-medium shadow hover:shadow-md">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
