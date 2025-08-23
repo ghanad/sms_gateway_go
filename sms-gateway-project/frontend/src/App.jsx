@@ -8,7 +8,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import MessageHistoryPage from './pages/MessageHistoryPage.jsx';
 import MessageDetailPage from './pages/MessageDetailPage.jsx';
 import UserManagementPage from './pages/admin/UserManagementPage.jsx';
-import ProvidersPage from './pages/admin/ProvidersPage.jsx';
+import ProvidersPage from './pages/admin/ProvidersPage.tsx';
 import ProviderAuditPage from './pages/admin/ProviderAuditPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';

@@ -19,7 +19,10 @@ const Layout = () => {
           <Link className="text-sm font-medium" to="/">Dashboard</Link>
           <Link className="text-sm font-medium" to="/messages">Messages</Link>
           {user?.isAdmin && (
-            <Link className="text-sm font-medium" to="/admin/users">Users</Link>
+            <>
+              <Link className="text-sm font-medium" to="/admin/users">Users</Link>
+              <Link className="text-sm font-medium" to="/admin/providers">Providers</Link>
+            </>
           )}
           <button className="text-sm font-medium" onClick={handleLogout}>Logout</button>
         </nav>
