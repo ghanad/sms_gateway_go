@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: SMS Provider Admin API
+  version: 1.0.0
+paths:
+  /admin/providers:
+    get:
+      summary: List providers
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create provider
+      responses:
+        '200': { description: OK }
+  /admin/providers/{id}:
+    get:
+      summary: Get provider
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    patch:
+      summary: Update provider
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Disable provider
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+  /admin/providers/{id}/test:
+    post:
+      summary: Test provider
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }

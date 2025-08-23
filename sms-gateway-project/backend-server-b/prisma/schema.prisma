@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model sms_providers {
+  id                      String   @id @default(uuid())
+  name                    String   @unique
+  type                    String
+  base_url                String
+  endpoint_path           String
+  auth_type               String
+  basic_username          String?  @db.Text
+  basic_password_ciphertext String? @db.Text
+  default_sender          String?  @db.Text
+  extra_headers_json      Json?
+  timeout_ms              Int      @default(10000)
+  retries                 Int      @default(2)
+  retry_backoff_ms        Int      @default(500)
+  is_enabled              Boolean  @default(true)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+  sms_provider_audit      sms_provider_audit[]
+}
+
+model sms_provider_audit {
+  id          String   @id @default(uuid())
+  provider    sms_providers @relation(fields: [provider_id], references: [id])
+  provider_id String
+  actor       String
+  action      String
+  before      Json?
+  after       Json?
+  at          DateTime @default(now())
+}
