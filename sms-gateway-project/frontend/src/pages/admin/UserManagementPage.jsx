@@ -94,7 +94,7 @@ const UserManagementPage = () => {
       department,
       password,
       api_key: apiKey,
-      daily_quota: dailyQuota,
+      daily_quota: dailyQuota ? parseInt(dailyQuota, 10) : null, // Convert to number or null
       is_admin: isAdmin,
       is_active: isActive
     };
@@ -212,12 +212,12 @@ const UserManagementPage = () => {
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={modalStyle}>
           <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit User' : 'Create User'}</h2>
-          <TextField label="Username" fullWidth margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <TextField label="Username *" fullWidth margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} />
           <TextField label="Name" fullWidth margin="normal" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Phone" fullWidth margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} />
           <TextField label="Extension" fullWidth margin="normal" value={extension} onChange={(e) => setExtension(e.target.value)} />
           <TextField label="Department" fullWidth margin="normal" value={department} onChange={(e) => setDepartment(e.target.value)} />
-          <TextField label="Password" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <TextField label="Password *" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
           <TextField label="API Key" fullWidth margin="normal" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
           <TextField label="Daily Quota" fullWidth margin="normal" value={dailyQuota} onChange={(e) => setDailyQuota(e.target.value)} />
           <FormControlLabel control={<Checkbox checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} />} label="Admin" />

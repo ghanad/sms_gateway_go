@@ -5,11 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"sms-gateway/backend-server-b/internal/models"
 	"sms-gateway/backend-server-b/internal/repository"
 	"sms-gateway/backend-server-b/internal/services"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Handlers bundles API handlers with required dependencies.
@@ -146,14 +147,14 @@ func (h *Handlers) GetMessagesHandler(c *gin.Context) {
 
 // UserRequest represents the payload for creating a user.
 type UserRequest struct {
-	Username   string `json:"username"`
+	Username   string `json:"username" binding:"required"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
 	Extension  string `json:"extension"`
 	Department string `json:"department"`
-	Password   string `json:"password"`
+	Password   string `json:"password" binding:"required"`
 	APIKey     string `json:"api_key"`
-	DailyQuota int    `json:"daily_quota"`
+	DailyQuota *int   `json:"daily_quota"` // Make DailyQuota optional
 	IsAdmin    bool   `json:"is_admin"`
 	IsActive   bool   `json:"is_active"`
 }
@@ -178,9 +179,12 @@ func (h *Handlers) CreateUserHandler(c *gin.Context) {
 		Department: req.Department,
 		Password:   string(hashed),
 		APIKey:     req.APIKey,
-		DailyQuota: req.DailyQuota,
+		DailyQuota: 0, // Default to 0 if not provided
 		IsAdmin:    req.IsAdmin,
 		IsActive:   req.IsActive,
+	}
+	if req.DailyQuota != nil {
+		user.DailyQuota = *req.DailyQuota
 	}
 	if err := h.UserRepo.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create user"})
@@ -267,7 +271,9 @@ func (h *Handlers) UpdateUserHandler(c *gin.Context) {
 	user.Extension = req.Extension
 	user.Department = req.Department
 	user.APIKey = req.APIKey
-	user.DailyQuota = req.DailyQuota
+	if req.DailyQuota != nil {
+		user.DailyQuota = *req.DailyQuota
+	}
 	user.IsAdmin = req.IsAdmin
 	user.IsActive = req.IsActive
 	if req.Password != "" {
