@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -49,10 +49,13 @@ const ProvidersPage = () => {
   ];
 
   return (
-    <Box p={2}>
-      <Box display="flex" justifyContent="space-between" mb={2}>
+    <>
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">Providers</h2>
+      </div>
+      <div className="flex justify-end mb-4">
         <Button variant="contained" onClick={() => { setEditing(undefined); setFormOpen(true); }}>New Provider</Button>
-      </Box>
+      </div>
       <div style={{ height: 400, width: '100%' }}>
         <DataGrid rows={data || []} columns={columns} getRowId={(row) => row.id} />
       </div>
@@ -80,7 +83,7 @@ const ProvidersPage = () => {
           }}
         />
       )}
-    </Box>
+    </>
   );
 };
 
