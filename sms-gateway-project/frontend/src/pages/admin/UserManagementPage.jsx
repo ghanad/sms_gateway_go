@@ -199,7 +199,7 @@ const UserManagementPage = () => {
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-t border-t-[#dbe0e6]">
+                <tr key={user.id} className={`border-t border-t-[#dbe0e6] ${!user.is_active ? 'deactivated-user' : ''}`}>
                   <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-120 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">{user.name}</td>
                   <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-240 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.username}</td>
                   <td className="table-55634cf7-bf2b-479a-bbea-4aaef2adb094-column-360 h-[72px] px-4 py-2 w-[400px] text-[#60758a] text-sm font-normal leading-normal">{user.phone}</td>

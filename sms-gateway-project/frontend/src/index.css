@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.deactivated-user {
+  background-color: #f0f0f0; /* Lighter background color */
+  color: #a0a0a0; /* Lighter text color */
+}
