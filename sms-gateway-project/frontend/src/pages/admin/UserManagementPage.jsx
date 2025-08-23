@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Box, TextField, FormControlLabel, Checkbox } from '@mui/material';
 import apiService from '../../services/apiService.js';
 import UserActionsDropdown from '../../components/UserActionsDropdown.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 
 const modalStyle = {
   position: 'absolute',
@@ -16,6 +17,7 @@ const modalStyle = {
 };
 
 const UserManagementPage = () => {
+  const { addToast } = useToast();
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -98,29 +100,46 @@ const UserManagementPage = () => {
       is_admin: isAdmin,
       is_active: isActive
     };
-    if (editingId) {
-      await apiService.updateUser(editingId, payload);
-    } else {
-      await apiService.createUser(payload);
+    try {
+      if (editingId) {
+        await apiService.updateUser(editingId, payload);
+        addToast('User updated successfully!', 'success');
+      } else {
+        await apiService.createUser(payload);
+        addToast('User created successfully!', 'success');
+      }
+      setOpen(false);
+      resetForm();
+      setEditingId(null);
+      fetchUsers();
+    } catch (error) {
+      addToast(`Error saving user: ${error.message}`, 'error');
     }
-    setOpen(false);
-    resetForm();
-    setEditingId(null);
-    fetchUsers();
   };
 
   const handleDelete = async (id) => {
-    await apiService.deleteUser(id);
-    fetchUsers();
+    try {
+      await apiService.deleteUser(id);
+      addToast('User deleted successfully!', 'success');
+      fetchUsers();
+    } catch (error) {
+      addToast(`Error deleting user: ${error.message}`, 'error');
+    }
   };
 
   const handleToggleActive = async (user) => {
-    if (user.is_active) {
-      await apiService.deactivateUser(user.id);
-    } else {
-      await apiService.activateUser(user.id);
+    try {
+      if (user.is_active) {
+        await apiService.deactivateUser(user.id);
+        addToast('User deactivated successfully!', 'success');
+      } else {
+        await apiService.activateUser(user.id);
+        addToast('User activated successfully!', 'success');
+      }
+      fetchUsers();
+    } catch (error) {
+      addToast(`Error toggling user status: ${error.message}`, 'error');
     }
-    fetchUsers();
   };
 
 
