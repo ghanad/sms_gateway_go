@@ -2,6 +2,7 @@ export interface ProviderConfig {
   id: string;
   name: string;
   type: string;
+  is_enabled: boolean;
   base_url: string;
   endpoint_path: string;
   auth_type: 'basic'|'apikey'|'bearer'|'none';
@@ -12,6 +13,10 @@ export interface ProviderConfig {
   timeout_ms: number;
   retries: number;
   retry_backoff_ms: number;
+  balance_endpoint_path?: string;
+  balance_method?: string;
+  balance_timeout_ms?: number;
+  updated_at?: Date;
 }
 
 export interface SendRequest {
@@ -33,7 +38,16 @@ export interface SendResult {
   retryable?: boolean;
 }
 
+export interface BalanceResult {
+  ok: boolean;
+  balance?: number;
+  unit?: string;
+  raw?: any;
+  error?: string;
+}
+
 export interface SmsProvider {
   type: 'magfa' | string;
   send(req: SendRequest, cfg: ProviderConfig): Promise<SendResult>;
+  getBalance?(cfg: ProviderConfig): Promise<BalanceResult>;
 }

@@ -8,6 +8,7 @@ describe('MagfaProvider', () => {
     id: '1',
     name: 'magfa',
     type: 'magfa',
+    is_enabled: true,
     base_url: 'https://sms.magfa.com',
     endpoint_path: '/api/http/sms/v2/send',
     auth_type: 'basic',
@@ -51,5 +52,37 @@ describe('MagfaProvider', () => {
     const res = await provider.send({ providerId: '1', sender: 's', message: 'm', recipients: ['r1'] }, cfg);
     expect(res.retryable).toBe(true);
     scope.done();
+  });
+
+  describe('getBalance', () => {
+    it('parses balance', async () => {
+      const provider = new MagfaProvider();
+      const scope = nock('https://sms.magfa.com')
+        .get('/bal')
+        .reply(200, { balance: 42 });
+      const res = await provider.getBalance({ ...cfg, balance_endpoint_path: '/bal' });
+      expect(res.ok).toBe(true);
+      expect(res.balance).toBe(42);
+      scope.done();
+    });
+
+    it('returns raw when unknown', async () => {
+      const provider = new MagfaProvider();
+      const scope = nock('https://sms.magfa.com')
+        .get('/bal')
+        .reply(200, { foo: 'bar' });
+      const res = await provider.getBalance({ ...cfg, balance_endpoint_path: '/bal' });
+      expect(res.ok).toBe(true);
+      expect(res.balance).toBeUndefined();
+      expect(res.raw.foo).toBe('bar');
+      scope.done();
+    });
+
+    it('returns not supported', async () => {
+      const provider = new MagfaProvider();
+      const res = await provider.getBalance(cfg);
+      expect(res.ok).toBe(false);
+      expect(res.error).toBe('NOT_SUPPORTED');
+    });
   });
 });

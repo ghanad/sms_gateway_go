@@ -1,0 +1,26 @@
+providers:
+  - id: magfa-prod
+    type: magfa
+    is_enabled: true
+    base_url: https://sms.magfa.com
+    send:
+      endpoint_path: /api/http/sms/v2/send
+      method: POST
+      headers:
+        Accept: application/json
+        Content-Type: application/json
+        Cache-Control: no-cache
+      timeout_ms: 10000
+      retries:
+        count: 2
+        backoff_ms: 500
+    balance:
+      endpoint_path: /api/http/sms/v2/balance
+      method: GET
+      timeout_ms: 5000
+    auth:
+      type: basic
+      username: ${MAGFA_USERNAME_DOMAIN}
+      password_env: MAGFA_PASSWORD
+    defaults:
+      sender: YOUR_SENDER_NUMBER

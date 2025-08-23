@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+const providersAdminEnabled = import.meta.env.NEXT_PUBLIC_PROVIDERS_ADMIN_ENABLED === 'true';
 
 const Layout = () => {
   const { logout, user } = useAuth();
@@ -21,7 +22,9 @@ const Layout = () => {
           {user?.isAdmin && (
             <>
               <Link className="text-sm font-medium" to="/admin/users">Users</Link>
-              <Link className="text-sm font-medium" to="/admin/providers">Providers</Link>
+              {providersAdminEnabled && (
+                <Link className="text-sm font-medium" to="/admin/providers">Providers</Link>
+              )}
             </>
           )}
           <button className="text-sm font-medium" onClick={handleLogout}>Logout</button>

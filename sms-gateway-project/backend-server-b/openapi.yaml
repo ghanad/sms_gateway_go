@@ -9,44 +9,49 @@ paths:
       responses:
         '200': { description: OK }
     post:
-      summary: Create provider
+      summary: Create provider (disabled)
+      deprecated: true
+      responses:
+        '501': { description: Not Implemented }
+  /admin/providers/{id}/balance:
+    get:
+      summary: Get provider balance
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
       responses:
         '200': { description: OK }
   /admin/providers/{id}:
-    get:
-      summary: Get provider
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string }
-      responses:
-        '200': { description: OK }
     patch:
-      summary: Update provider
+      summary: Update provider (disabled)
+      deprecated: true
       parameters:
         - in: path
           name: id
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        '501': { description: Not Implemented }
     delete:
-      summary: Disable provider
+      summary: Disable provider (disabled)
+      deprecated: true
       parameters:
         - in: path
           name: id
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        '501': { description: Not Implemented }
   /admin/providers/{id}/test:
     post:
-      summary: Test provider
+      summary: Test provider (disabled)
+      deprecated: true
       parameters:
         - in: path
           name: id
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        '501': { description: Not Implemented }

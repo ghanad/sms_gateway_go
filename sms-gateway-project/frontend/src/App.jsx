@@ -10,6 +10,8 @@ import MessageDetailPage from './pages/MessageDetailPage.jsx';
 import UserManagementPage from './pages/admin/UserManagementPage.jsx';
 import ProvidersPage from './pages/admin/ProvidersPage.tsx';
 import ProviderAuditPage from './pages/admin/ProviderAuditPage.jsx';
+import ProvidersReadOnlyPage from './pages/admin/ProvidersReadOnlyPage.tsx';
+const providersAdminEnabled = import.meta.env.NEXT_PUBLIC_PROVIDERS_ADMIN_ENABLED === 'true';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 
@@ -27,8 +29,14 @@ function App() {
                 <Route path="/messages/:trackingId" element={<MessageDetailPage />} />
                 <Route element={<AdminRoute />}>
                   <Route path="/admin/users" element={<UserManagementPage />} />
-                  <Route path="/admin/providers" element={<ProvidersPage />} />
-                  <Route path="/admin/providers/:id/audit" element={<ProviderAuditPage />} />
+                  {providersAdminEnabled ? (
+                    <>
+                      <Route path="/admin/providers" element={<ProvidersPage />} />
+                      <Route path="/admin/providers/:id/audit" element={<ProviderAuditPage />} />
+                    </>
+                  ) : (
+                    <Route path="/admin/providers" element={<ProvidersReadOnlyPage />} />
+                  )}
                 </Route>
               </Route>
             </Route>

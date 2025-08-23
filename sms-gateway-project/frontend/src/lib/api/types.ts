@@ -15,18 +15,21 @@ export interface paths {
         };
       };
     };
-    /** Create provider */
+    /**
+     * Create provider (disabled)
+     * @deprecated
+     */
     post: {
       responses: {
-        /** @description OK */
-        200: {
+        /** @description Not Implemented */
+        501: {
           content: never;
         };
       };
     };
   };
-  "/admin/providers/{id}": {
-    /** Get provider */
+  "/admin/providers/{id}/balance": {
+    /** Get provider balance */
     get: {
       parameters: {
         path: {
@@ -40,7 +43,12 @@ export interface paths {
         };
       };
     };
-    /** Disable provider */
+  };
+  "/admin/providers/{id}": {
+    /**
+     * Disable provider (disabled)
+     * @deprecated
+     */
     delete: {
       parameters: {
         path: {
@@ -48,13 +56,16 @@ export interface paths {
         };
       };
       responses: {
-        /** @description OK */
-        200: {
+        /** @description Not Implemented */
+        501: {
           content: never;
         };
       };
     };
-    /** Update provider */
+    /**
+     * Update provider (disabled)
+     * @deprecated
+     */
     patch: {
       parameters: {
         path: {
@@ -62,15 +73,18 @@ export interface paths {
         };
       };
       responses: {
-        /** @description OK */
-        200: {
+        /** @description Not Implemented */
+        501: {
           content: never;
         };
       };
     };
   };
   "/admin/providers/{id}/test": {
-    /** Test provider */
+    /**
+     * Test provider (disabled)
+     * @deprecated
+     */
     post: {
       parameters: {
         path: {
@@ -78,8 +92,8 @@ export interface paths {
         };
       };
       responses: {
-        /** @description OK */
-        200: {
+        /** @description Not Implemented */
+        501: {
           content: never;
         };
       };
