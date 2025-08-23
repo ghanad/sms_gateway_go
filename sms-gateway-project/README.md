@@ -11,6 +11,7 @@ The React application lives in `frontend/` and was bootstrapped with Vite.
 ```bash
 cd frontend
 npm install
+npm run gen:api
 npm run dev
 ```
 

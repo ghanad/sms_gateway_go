@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import MessageHistoryPage from './pages/MessageHistoryPage.jsx';
 import MessageDetailPage from './pages/MessageDetailPage.jsx';
 import UserManagementPage from './pages/admin/UserManagementPage.jsx';
+import ProvidersPage from './pages/admin/ProvidersPage.jsx';
+import ProviderAuditPage from './pages/admin/ProviderAuditPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 
@@ -25,6 +27,8 @@ function App() {
                 <Route path="/messages/:trackingId" element={<MessageDetailPage />} />
                 <Route element={<AdminRoute />}>
                   <Route path="/admin/users" element={<UserManagementPage />} />
+                  <Route path="/admin/providers" element={<ProvidersPage />} />
+                  <Route path="/admin/providers/:id/audit" element={<ProviderAuditPage />} />
                 </Route>
               </Route>
             </Route>
