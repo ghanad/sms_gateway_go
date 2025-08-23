@@ -1,9 +1,14 @@
 import axios from 'axios';
 
-const baseUrl = import.meta.env.NEXT_PUBLIC_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || '';
+// Base URL for backend API. When no environment variable is provided the
+// frontend will proxy `/api` to the backend service.
+const rawBaseUrl =
+  import.meta.env.NEXT_PUBLIC_API_BASE_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  '';
 
 const api = axios.create({
-  baseURL: baseUrl + '/api'
+  baseURL: `${rawBaseUrl.replace(/\/$/, '')}/api`
 });
 
 api.interceptors.request.use((config) => {
