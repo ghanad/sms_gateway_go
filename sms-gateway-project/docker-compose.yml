@@ -26,7 +26,9 @@ services:
       - "5432:5432"
 
   backend-server-b:
-    image: server-b:v1.3
+    build:
+      context: ./backend-server-b
+      dockerfile: Dockerfile
     restart: always
     environment:
       LISTEN_ADDR: ":8081"
@@ -44,7 +46,9 @@ services:
       - rabbitmq
 
   frontend:
-    image: frontend:v1.1
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "5173:80"
