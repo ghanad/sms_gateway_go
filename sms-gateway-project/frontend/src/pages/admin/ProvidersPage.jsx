@@ -22,7 +22,7 @@ export default function ProvidersPage() {
 
   const queryClient = useQueryClient();
   const { data: rows = [], isLoading, error } = useQuery(["providers.list"], async () => {
-    const { data, error } = await apiClient.GET("/admin/providers");
+    const { data, error } = await apiClient.get("/admin/providers");
     if (error) throw error;
     return data || [];
   });
@@ -57,7 +57,7 @@ export default function ProvidersPage() {
 
   async function handleDelete(row) {
     if (!confirm(`Delete provider "${row.name}"?`)) return;
-    await apiClient.DELETE("/admin/providers/{id}", { params: { path: { id: row.id } } });
+    await apiClient.del("/admin/providers/{id}", { params: { path: { id: row.id } } });
     queryClient.invalidateQueries(["providers.list"]);
   }
 
@@ -179,9 +179,9 @@ export default function ProvidersPage() {
           initialData={editing}
           onSuccess={async (body) => {
             if (editing) {
-              await apiClient.PATCH("/admin/providers/{id}", { params: { path: { id: editing.id } }, body });
+              await apiClient.patch("/admin/providers/{id}", { params: { path: { id: editing.id } }, body });
             } else {
-              await apiClient.POST("/admin/providers", { body });
+              await apiClient.post("/admin/providers", { body });
             }
             queryClient.invalidateQueries(["providers.list"]);
           }}
@@ -193,7 +193,7 @@ export default function ProvidersPage() {
           open={!!testProvider}
           onClose={() => setTestProvider(undefined)}
           onSubmit={async (data) => {
-            await apiClient.POST("/admin/providers/{id}/test", {
+            await apiClient.post("/admin/providers/{id}/test", {
               params: { path: { id: testProvider.id } },
               body: { sender: data.sender, message: data.message, recipients: data.recipients, dry_run: data.dryRun },
             });

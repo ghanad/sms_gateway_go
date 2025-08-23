@@ -11,7 +11,7 @@ const ProviderAuditPage = () => {
 
   const { id } = useParams();
   const { data } = useQuery(['provider.audit', id], async () => {
-    const { data } = await apiClient.GET('/admin/providers/{id}/audit', { params: { path: { id } } });
+    const { data } = await apiClient.get('/admin/providers/{id}/audit', { params: { path: { id } } });
     return data || [];
   });
 
