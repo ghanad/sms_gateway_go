@@ -14,6 +14,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  res => res,
+  err => {
+    const status = err.response?.status;
+    if (status === 401 || status === 403) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
+    }
+    return Promise.reject(err);
+  }
+);
+
 const login = async (username, password) => {
   const response = await api.post('/auth/login', { username, password });
   return response.data;

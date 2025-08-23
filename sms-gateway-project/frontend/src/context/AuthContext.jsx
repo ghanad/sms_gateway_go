@@ -3,20 +3,31 @@ import apiService from '../services/apiService.js';
 
 const AuthContext = createContext(null);
 
+const getInitialToken = () => {
+  const t = localStorage.getItem('token');
+  if (!t) return null;
+  try {
+    const payload = JSON.parse(atob(t.split('.')[1]));
+    const expired = payload.exp * 1000 < Date.now();
+    if (expired) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
+    return t;
+  } catch {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('user');
-    if (stored && stored !== 'undefined') {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        console.error("Failed to parse user from localStorage", e);
-        return null;
-      }
-    }
-    return null;
+    return stored && stored !== 'undefined' ? JSON.parse(stored) : null;
   });
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [token, setToken] = useState(getInitialToken);
   const isAuthenticated = !!token;
 
   const login = async (username, password) => {
