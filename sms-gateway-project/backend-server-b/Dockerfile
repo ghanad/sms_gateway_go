@@ -1,6 +1,7 @@
 # Stage 1: build
 FROM golang:1.24-alpine AS builder
 WORKDIR /app
+ENV GOPROXY=https://saye.tsetmc.com/artifactory/api/go/go
 COPY go.mod go.sum ./
 RUN go mod download
 COPY internal ./internal

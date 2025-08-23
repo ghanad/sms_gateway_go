@@ -24,7 +24,7 @@ const Layout = () => {
           <button className="text-sm font-medium" onClick={handleLogout}>Logout</button>
         </nav>
       </header>
-      <main className="flex-1 px-40 py-5">
+      <main className="flex-1 px-40 py-5 flex justify-center">
         <Outlet />
       </main>
     </div>
