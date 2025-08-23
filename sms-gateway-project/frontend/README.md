@@ -19,4 +19,26 @@ To build and run the frontend application using Docker, follow these steps:
     ```bash
     docker run -p 80:80 sms-gateway-frontend
     ```
-    This will map port 80 of the container to port 80 on your host machine. You can then access the application in your browser at `http://localhost`.
+This will map port 80 of the container to port 80 on your host machine. You can then access the application in your browser at `http://localhost`.
+
+## Toast Notifications
+
+The frontend includes a simple toast notification system located in `src/context/ToastContext.jsx`. It is already wired into `App.jsx` so that any component can trigger toasts.
+
+To display a toast message from a component:
+
+```jsx
+import { useToast } from '../context/ToastContext.jsx';
+
+function Example() {
+  const { addToast } = useToast();
+
+  return (
+    <button onClick={() => addToast('Saved!', 'success')}>
+      Save
+    </button>
+  );
+}
+```
+
+Supported toast types are `success`, `error`, `warning`, and `info` (default).
