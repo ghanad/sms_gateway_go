@@ -125,7 +125,7 @@ const UserManagementPage = () => {
 
 
   return (
-    <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
+    <div className="layout-content-container flex flex-col flex-1">
       <div className="flex flex-wrap justify-between gap-3 p-4">
         <div className="flex min-w-72 flex-col gap-3">
           <p className="text-[#111418] tracking-light text-[32px] font-bold leading-tight">User Management</p>

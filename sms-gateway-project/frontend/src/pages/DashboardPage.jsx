@@ -40,7 +40,7 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="layout-content-container flex flex-col max-w-[960px] mx-auto">
+    <div className="layout-content-container flex flex-col flex-1">
       <div className="flex flex-wrap justify-between gap-3 p-4">
         <div className="flex min-w-72 flex-col gap-3">
           <p className="text-2xl font-bold text-gray-900">Dashboard</p>
