@@ -102,6 +102,7 @@ export default function ProvidersPage() {
                     <Th onClick={() => onSort('name')} active={sortKey==='name'} dir={sortDir}>Name</Th>
                     <Th onClick={() => onSort('type')} active={sortKey==='type'} dir={sortDir}>Type</Th>
                     <Th onClick={() => onSort('is_enabled')} active={sortKey==='is_enabled'} dir={sortDir}>Status</Th>
+                    <Th onClick={() => onSort('priority')} active={sortKey==='priority'} dir={sortDir}>Priority</Th>
                     <Th onClick={() => onSort('base_url')} active={sortKey==='base_url'} dir={sortDir}>Base URL</Th>
                     <Th onClick={() => onSort('updated_at')} active={sortKey==='updated_at'} dir={sortDir}>Updated At</Th>
                     <th className="px-3 py-2 text-right">Actions</th>
@@ -109,13 +110,13 @@ export default function ProvidersPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {isLoading && (
-                    <tr><td colSpan={6} className="px-3 py-10 text-center text-slate-500">Loading…</td></tr>
+                    <tr><td colSpan={7} className="px-3 py-10 text-center text-slate-500">Loading…</td></tr>
                   )}
                   {error && (
-                    <tr><td colSpan={6} className="px-3 py-10 text-center text-rose-600">Failed to load</td></tr>
+                    <tr><td colSpan={7} className="px-3 py-10 text-center text-rose-600">Failed to load</td></tr>
                   )}
                   {!isLoading && filteredSorted.length === 0 && (
-                    <tr><td colSpan={6} className="px-3 py-10 text-center text-slate-500">No providers</td></tr>
+                    <tr><td colSpan={7} className="px-3 py-10 text-center text-slate-500">No providers</td></tr>
                   )}
                   {!isLoading && filteredSorted.map((row) => (
                     <tr key={row.id} className="hover:bg-slate-50">
@@ -128,6 +129,7 @@ export default function ProvidersPage() {
                           <span className="inline-flex items-center rounded-full bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 text-xs">Disabled</span>
                         )}
                       </td>
+                      <td className="px-3 py-2 text-slate-700">{row.priority}</td>
                       <td className="px-3 py-2 text-slate-700">
                         <a href={row.base_url} target="_blank" rel="noreferrer" className="underline decoration-slate-300 hover:decoration-slate-600">
                           {row.base_url || '-'}

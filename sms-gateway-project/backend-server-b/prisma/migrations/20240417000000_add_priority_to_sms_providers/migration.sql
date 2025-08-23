@@ -1,0 +1,1 @@
+ALTER TABLE "sms_providers" ADD COLUMN "priority" INTEGER NOT NULL DEFAULT 100;

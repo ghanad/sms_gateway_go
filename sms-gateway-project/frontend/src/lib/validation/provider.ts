@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const priorityGuard = z.number().int().min(0).max(100);
+
 export const providerBaseSchema = z.object({
   name: z.string().min(3).regex(/^[a-z0-9_-]+$/),
   type: z.enum(['magfa']),
@@ -11,6 +13,7 @@ export const providerBaseSchema = z.object({
   timeout_ms: z.number().int().positive().max(60000).default(10000),
   retries: z.number().int().min(0).max(5).default(2),
   retry_backoff_ms: z.number().int().min(0).max(60000).default(500),
+  priority: priorityGuard,
   extra_headers_json: z.record(z.string(), z.string()).default({})
 });
 
