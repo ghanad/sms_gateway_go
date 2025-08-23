@@ -4,6 +4,22 @@ This directory contains the frontend application for the SMS Gateway project. It
 
 The interface uses [Tailwind CSS](https://tailwindcss.com/) via the CDN script included in `index.html`, allowing rapid UI prototyping without additional build steps.
 
+## Development
+
+Create an `.env.local` based on `.env.example` and set the API base URL:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+```
+
+Then install dependencies, generate the API client, and start the dev server:
+
+```bash
+npm install
+npm run gen:api
+npm run dev
+```
+
 ## Dockerization
 
 To build and run the frontend application using Docker, follow these steps:
