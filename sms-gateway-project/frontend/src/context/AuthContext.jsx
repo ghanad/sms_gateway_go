@@ -7,7 +7,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('user');
     if (stored && stored !== 'undefined') {
-      return JSON.parse(stored);
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        return null;
+      }
     }
     return null;
   });

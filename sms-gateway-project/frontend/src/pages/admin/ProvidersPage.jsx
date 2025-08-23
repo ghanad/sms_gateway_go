@@ -24,8 +24,8 @@ const ProvidersPage = () => {
   });
 
   const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<any>();
-  const [testProvider, setTestProvider] = useState<any>();
+  const [editing, setEditing] = useState();
+  const [testProvider, setTestProvider] = useState();
 
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1 },
