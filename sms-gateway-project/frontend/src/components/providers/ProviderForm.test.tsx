@@ -12,6 +12,7 @@ const baseProvider = {
   auth_type: 'basic',
   basic_username: 'user/domain',
   basic_password: 'secret',
+  priority: 55,
   timeout_ms: 10000,
   retries: 2,
   retry_backoff_ms: 500,
@@ -22,4 +23,5 @@ test('prefills form when editing', () => {
   render(<ProviderForm open={true} onClose={() => {}} onSuccess={vi.fn()} initialData={baseProvider} />);
   expect(screen.getByDisplayValue('existing')).toBeInTheDocument();
   expect(screen.getByDisplayValue('user/domain')).toBeInTheDocument();
+  expect(screen.getByDisplayValue('55')).toBeInTheDocument();
 });

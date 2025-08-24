@@ -43,6 +43,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({ open, onClose, initialData,
       base_url: 'https://sms.magfa.com',
       endpoint_path: '/api/http/sms/v2/send',
       auth_type: 'basic',
+      priority: 100,
       timeout_ms: 10000,
       retries: 2,
       retry_backoff_ms: 500,
@@ -54,7 +55,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({ open, onClose, initialData,
     if (open) {
       reset(initialData || {
         type: 'magfa', is_enabled: true, base_url: 'https://sms.magfa.com', endpoint_path: '/api/http/sms/v2/send',
-        auth_type: 'basic', timeout_ms: 10000, retries: 2, retry_backoff_ms: 500,
+        auth_type: 'basic', priority: 100, timeout_ms: 10000, retries: 2, retry_backoff_ms: 500,
         extra_headers_json: { 'Cache-Control': 'no-cache', 'Accept': 'application/json' },
       });
       setChangePassword(false);
@@ -228,6 +229,14 @@ const ProviderForm: React.FC<ProviderFormProps> = ({ open, onClose, initialData,
 
             {/* Defaults / Advanced */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Controller name="priority" control={control} render={({ field }) => (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="priority">Priority (0–100)</label>
+                  <input id="priority" type="number" min={0} max={100} {...field} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent" />
+                  {errors.priority && <p className="mt-1 text-xs text-rose-600">{errors.priority.message as string}</p>}
+                </div>
+              )} />
+
               <Controller name="default_sender" control={control} render={({ field }) => (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="default_sender">Default Sender</label>

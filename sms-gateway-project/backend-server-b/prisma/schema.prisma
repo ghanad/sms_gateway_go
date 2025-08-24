@@ -21,6 +21,7 @@ model sms_providers {
   timeout_ms              Int      @default(10000)
   retries                 Int      @default(2)
   retry_backoff_ms        Int      @default(500)
+  priority                Int      @default(100)
   is_enabled              Boolean  @default(true)
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
