@@ -5,10 +5,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': {
-        target: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.VITE_API_BASE_URL || 'http://localhost:8081',
+      '/api/v1/admin': {
+        target: process.env.ADMIN_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/api/v1': {
+        target: process.env.API_BASE_URL || 'http://localhost:8081',
+        changeOrigin: true,
       },
     },
   },

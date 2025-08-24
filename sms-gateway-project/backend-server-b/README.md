@@ -22,7 +22,7 @@ npm start
 Create provider:
 
 ```bash
-curl -X POST http://localhost:8080/admin/providers \
+curl -X POST http://localhost:8080/api/v1/admin/providers \
   -H 'Content-Type: application/json' \
   -d '{
     "name":"magfa-prod",

@@ -6,10 +6,12 @@ The interface uses [Tailwind CSS](https://tailwindcss.com/) via the CDN script i
 
 ## Development
 
-Create an `.env.local` based on `.env.example` and set the API base URL:
+Create an `.env.local` based on `.env.example` and set the API paths and backend targets:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+VITE_API_BASE=/api/v1
+API_BASE_URL=http://localhost:8081
+ADMIN_API_BASE_URL=http://localhost:8080
 ```
 
 Then install dependencies, generate the API client, and start the dev server:

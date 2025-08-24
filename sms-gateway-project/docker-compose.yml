@@ -53,9 +53,11 @@ services:
     ports:
       - "5173:80"
     depends_on:
-      - backend-server-b 
+      - backend-server-b
     environment:
-      VITE_API_BASE_URL: "http://localhost:8081"
+      VITE_API_BASE: "/api/v1"
+      API_BASE_URL: "http://localhost:8081"
+      ADMIN_API_BASE_URL: "http://localhost:8080"
 
 volumes:
   postgres_data:
