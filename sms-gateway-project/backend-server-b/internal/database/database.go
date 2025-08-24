@@ -14,5 +14,10 @@ func ConnectDatabase(dsn string) (*gorm.DB, error) {
 
 // AutoMigrate runs GORM auto-migrations for all models.
 func AutoMigrate(db *gorm.DB) error {
-        return db.AutoMigrate(&models.Message{}, &models.MessageEvent{}, &models.UIUser{})
+	return db.AutoMigrate(&models.Message{}, &models.MessageEvent{}, &models.UIUser{}, &models.Provider{})
+}
+
+// Rollback drops tables for the provided models. Useful for tests.
+func Rollback(db *gorm.DB) error {
+	return db.Migrator().DropTable(&models.Provider{})
 }

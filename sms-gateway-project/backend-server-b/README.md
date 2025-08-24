@@ -1,20 +1,15 @@
 # Server B
 
-Node.js service that consumes SMS jobs from RabbitMQ and sends via configured providers.
+Go service that consumes SMS jobs from RabbitMQ and manages provider configurations.
 
 ## Setup
 
-```bash
-npm install
-npm run build
-```
-
-Copy `.env.example` to `.env` and adjust values.
+Copy `.env.example` to `.env` and adjust values for your environment.
 
 ## Running
 
 ```bash
-npm start
+go run ./cmd/api
 ```
 
 ## Admin examples
@@ -22,7 +17,7 @@ npm start
 Create provider:
 
 ```bash
-curl -X POST http://localhost:8080/admin/providers \
+curl -X POST http://localhost:8081/api/admin/providers \
   -H 'Content-Type: application/json' \
   -d '{
     "name":"magfa-prod",
@@ -40,5 +35,5 @@ curl -X POST http://localhost:8080/admin/providers \
 ## Testing
 
 ```bash
-npm test
+go test ./...
 ```

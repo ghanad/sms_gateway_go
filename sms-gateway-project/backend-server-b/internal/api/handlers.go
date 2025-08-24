@@ -17,12 +17,13 @@ import (
 type Handlers struct {
 	MessageRepo *repository.MessageRepository
 	UserRepo    *repository.UserRepository
+	ProviderSvc *services.ProviderService
 	JWTService  *services.JWTService
 }
 
 // NewHandlers creates a new Handlers instance.
-func NewHandlers(msgRepo *repository.MessageRepository, userRepo *repository.UserRepository, jwtSvc *services.JWTService) *Handlers {
-	return &Handlers{MessageRepo: msgRepo, UserRepo: userRepo, JWTService: jwtSvc}
+func NewHandlers(msgRepo *repository.MessageRepository, userRepo *repository.UserRepository, provSvc *services.ProviderService, jwtSvc *services.JWTService) *Handlers {
+	return &Handlers{MessageRepo: msgRepo, UserRepo: userRepo, ProviderSvc: provSvc, JWTService: jwtSvc}
 }
 
 // GetStatusHandler returns message status by tracking ID.

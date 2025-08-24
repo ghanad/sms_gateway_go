@@ -38,3 +38,21 @@ type UIUser struct {
 	IsActive   bool
 	IsAdmin    bool
 }
+
+// Provider represents an external SMS provider configuration.
+type Provider struct {
+	ID            uint   `gorm:"primaryKey"`
+	Name          string `gorm:"unique"`
+	Type          string
+	BaseURL       string
+	EndpointPath  string
+	AuthType      string
+	BasicUsername string
+	BasicPassword string
+	APIKey        string
+	DefaultSender string
+	Priority      int  `gorm:"default:100"`
+	IsEnabled     bool `gorm:"default:true"`
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
