@@ -5,7 +5,7 @@ import { startConsumer } from './consumer/rabbitConsumer';
 
 const app = express();
 app.use(express.json());
-app.use('/admin/providers', adminRouter);
+app.use('/api/admin/providers', adminRouter);
 
 app.listen(parseInt(env.SERVER_PORT), () => {
   console.log(`server listening on ${env.SERVER_PORT}`);
