@@ -31,6 +31,8 @@ func main() {
 
 	msgRepo := repository.NewMessageRepository(db)
 	userRepo := repository.NewUserRepository(db)
+	providerRepo := repository.NewProviderRepository(db)
+	providerSvc := services.NewProviderService(providerRepo)
 
 	if err := services.SeedAdminUser(userRepo, cfg.DefaultAdminUsername, cfg.DefaultAdminPassword); err != nil {
 		log.Fatalf("seed admin: %v", err)
@@ -51,7 +53,7 @@ func main() {
 		log.Fatalf("consumer: %v", err)
 	}
 
-	handlers := api.NewHandlers(msgRepo, userRepo, jwtSvc)
+	handlers := api.NewHandlers(msgRepo, userRepo, providerSvc, jwtSvc)
 	r := gin.Default()
 
 	// Configure CORS middleware
@@ -83,6 +85,16 @@ func main() {
 	userRoutes.DELETE(":id", handlers.DeleteUserHandler)
 	userRoutes.POST(":id/activate", handlers.ActivateUserHandler)
 	userRoutes.POST(":id/deactivate", handlers.DeactivateUserHandler)
+
+	adminRoutes := apiRoutes.Group("/admin")
+	adminRoutes.Use(api.AdminOnlyMiddleware())
+	provRoutes := adminRoutes.Group("/providers")
+	provRoutes.POST("", handlers.CreateProviderHandler)
+	provRoutes.GET("", handlers.ListProvidersHandler)
+	provRoutes.GET(":id", handlers.GetProviderHandler)
+	provRoutes.PATCH(":id", handlers.UpdateProviderHandler)
+	provRoutes.DELETE(":id", handlers.DeleteProviderHandler)
+	provRoutes.POST(":id/test", handlers.TestProviderHandler)
 
 	if err := r.Run(cfg.ListenAddr); err != nil {
 		log.Fatalf("server: %v", err)
